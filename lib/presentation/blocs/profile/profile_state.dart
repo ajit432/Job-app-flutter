@@ -57,7 +57,7 @@ class ProfileLoaded extends ProfileState {
   }
 
   bool get hasProfileType => user.profileType != null;
-  bool get isJobSeeker => user.profileType == UserType.jobSeeker;
+  bool get isJobSeeker => user.profileType == UserType.job_seeker;
   bool get isRecruiter => user.profileType == UserType.recruiter;
   bool get hasCompleteProfile => 
       user.profile?.fullName != null &&

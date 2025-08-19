@@ -38,14 +38,16 @@ class _RegisterPageState extends State<RegisterPage> {
                   backgroundColor: AppColors.error,
                 ),
               );
-            } else if (state is AuthAuthenticated) {
+            } else if (state is AuthRegistered) {
+              // Show success message and redirect to login page
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
-                  content: Text('Registration successful!'),
+                  content: Text('Registration successful! Please login to continue.'),
                   backgroundColor: AppColors.success,
                 ),
               );
-              Navigator.of(context).pushReplacementNamed('/home');
+              // Navigate to login page instead of home page
+              Navigator.of(context).pushReplacementNamed('/login');
             }
           },
           child: ResponsiveLayout(
@@ -97,8 +99,6 @@ class _RegisterPageState extends State<RegisterPage> {
         children: [
           _buildHeader(),
           const SizedBox(height: 32),
-          _buildPersonalInfoSection(),
-          const SizedBox(height: 24),
           _buildAccountInfoSection(),
           const SizedBox(height: 24),
           _buildUserTypeSelection(),
@@ -106,6 +106,8 @@ class _RegisterPageState extends State<RegisterPage> {
           _buildSubmitButton(),
           const SizedBox(height: 24),
           _buildAlternativeRegistration(),
+          const SizedBox(height: 24),
+          _buildLoginLink(),
         ],
       ),
     );
@@ -132,30 +134,15 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  Widget _buildPersonalInfoSection() {
+  Widget _buildAccountInfoSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'Personal Information',
+          'Account Information',
           style: Theme.of(context).textTheme.titleMedium?.copyWith(
             fontWeight: FontWeight.w600,
           ),
-        ),
-        const SizedBox(height: 16),
-        FormBuilderTextField(
-          name: 'fullName',
-          decoration: const InputDecoration(
-            labelText: 'Full Name',
-            hintText: 'Enter your full name',
-            prefixIcon: Icon(Icons.person_outline),
-          ),
-          validator: FormBuilderValidators.compose([
-            FormBuilderValidators.required(),
-            FormBuilderValidators.minLength(2),
-          ]),
-          textInputAction: TextInputAction.next,
-          textCapitalization: TextCapitalization.words,
         ),
         const SizedBox(height: 16),
         FormBuilderTextField(
@@ -171,34 +158,6 @@ class _RegisterPageState extends State<RegisterPage> {
           ]),
           keyboardType: TextInputType.emailAddress,
           textInputAction: TextInputAction.next,
-        ),
-        const SizedBox(height: 16),
-        FormBuilderTextField(
-          name: 'phone',
-          decoration: const InputDecoration(
-            labelText: 'Phone Number (Optional)',
-            hintText: 'Enter your phone number',
-            prefixIcon: Icon(Icons.phone_outlined),
-          ),
-          validator: FormBuilderValidators.compose([
-            FormBuilderValidators.phoneNumber(),
-          ]),
-          keyboardType: TextInputType.phone,
-          textInputAction: TextInputAction.next,
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAccountInfoSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Account Security',
-          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
         ),
         const SizedBox(height: 16),
         FormBuilderTextField(
@@ -289,12 +248,12 @@ class _RegisterPageState extends State<RegisterPage> {
           validator: FormBuilderValidators.required(),
           options: [
             FormBuilderFieldOption(
-              value: UserType.jobSeeker,
+              value: UserType.job_seeker,
               child: _buildUserTypeCard(
                 title: 'Job Seeker',
                 description: 'Looking for job opportunities and career growth',
                 icon: Icons.work_outline,
-                userType: UserType.jobSeeker,
+                userType: UserType.job_seeker,
               ),
             ),
             FormBuilderFieldOption(
@@ -304,6 +263,15 @@ class _RegisterPageState extends State<RegisterPage> {
                 description: 'Hiring talent and posting job opportunities',
                 icon: Icons.business_center_outlined,
                 userType: UserType.recruiter,
+              ),
+            ),
+            FormBuilderFieldOption(
+              value: UserType.companies,
+              child: _buildUserTypeCard(
+                title: 'Company',
+                description: 'Looking to hire talent or post job opportunities',
+                icon: Icons.business_outlined,
+                userType: UserType.companies,
               ),
             ),
           ],
@@ -332,7 +300,7 @@ class _RegisterPageState extends State<RegisterPage> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: AppColors.primary.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
@@ -403,14 +371,45 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
+  Widget _buildLoginLink() {
+    return TextButton(
+      onPressed: () {
+        Navigator.of(context).pushReplacementNamed('/login');
+      },
+      child: Text(
+        'Already have an account? Login',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColors.primary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
   void _handleRegister() {
     if (_formKey.currentState?.saveAndValidate() ?? false) {
       final values = _formKey.currentState!.value;
+      final userType = values['userType'] as UserType;
+      
+      // Convert enum to string value that matches database schema
+      String profileType;
+      switch (userType) {
+        case UserType.job_seeker:
+          profileType = 'job_seeker';
+          break;
+        case UserType.recruiter:
+          profileType = 'recruiter';
+          break;
+        case UserType.companies:
+          profileType = 'companies';
+          break;
+      }
+      
       context.read<AuthBloc>().add(
         AuthRegisterRequested(
           email: values['email'],
           password: values['password'],
-          fullName: values['fullName'],
+          profileType: profileType,
         ),
       );
     }

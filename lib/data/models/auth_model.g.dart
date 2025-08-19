@@ -24,13 +24,25 @@ Map<String, dynamic> _$AuthResponseModelToJson(AuthResponseModel instance) =>
 
 AuthDataModel _$AuthDataModelFromJson(Map<String, dynamic> json) =>
     AuthDataModel(
-      accessToken: json['accessToken'] as String,
+      accessToken: json['accessToken'] as String?,
       user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AuthDataModelToJson(AuthDataModel instance) =>
     <String, dynamic>{
       'accessToken': instance.accessToken,
+      'user': instance.user,
+    };
+
+RegistrationDataModel _$RegistrationDataModelFromJson(
+        Map<String, dynamic> json) =>
+    RegistrationDataModel(
+      user: UserModel.fromJson(json['user'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$RegistrationDataModelToJson(
+        RegistrationDataModel instance) =>
+    <String, dynamic>{
       'user': instance.user,
     };
 

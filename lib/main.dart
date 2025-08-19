@@ -8,6 +8,7 @@ import 'core/network/api_client.dart';
 import 'presentation/blocs/auth/auth_bloc.dart';
 import 'presentation/blocs/theme/theme_bloc.dart';
 import 'presentation/pages/auth/login_page.dart';
+import 'presentation/pages/auth/register_page.dart';
 import 'presentation/pages/home/home_page.dart';
 
 void main() async {
@@ -70,6 +71,7 @@ class JobPortalApp extends StatelessWidget {
             ),
             routes: {
               '/login': (context) => const LoginPage(),
+              '/register': (context) => const RegisterPage(),
               '/home': (context) => const HomePage(),
             },
           );

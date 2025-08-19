@@ -71,30 +71,46 @@ class AuthRepository {
     }
   }
 
-  // Register new user
+  // User Registration
   Future<AuthResponseModel> register({
     required String email,
     required String password,
+    required String profileType,
   }) async {
     try {
+      print('AuthRepository: Starting registration for $email with profileType: $profileType');
+      
       final response = await ApiClient.register({
         'email': email,
         'password': password,
+        'profileType': profileType,
         'registrationType': 'email',
       });
 
-      final authResponse = AuthResponseModel.fromJson(response.data);
+      print('AuthRepository: Received response: ${response.data}');
       
-      if (authResponse.success && authResponse.data != null) {
+      final authResponse = AuthResponseModel.fromJson(response.data);
+      print('AuthRepository: Parsed AuthResponseModel: success=${authResponse.success}, message=${authResponse.message}');
+      
+      // Don't save auth data during registration - user needs to login separately
+      // Only save auth data if there's an accessToken (which shouldn't happen during registration)
+      if (authResponse.success && authResponse.data != null && authResponse.data!.accessToken != null) {
+        print('AuthRepository: Access token found, saving auth data...');
         await _saveAuthData(authResponse.data!);
+        print('AuthRepository: Auth data saved successfully');
+      } else if (authResponse.success) {
+        print('AuthRepository: Registration successful, no auth data to save');
       }
       
       return authResponse;
     } on DioException catch (e) {
+      print('AuthRepository: DioException caught: ${e.message}');
       return _handleDioError(e);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      print('AuthRepository: Unexpected error: $e');
+      print('AuthRepository: Stack trace: $stackTrace');
       return AuthResponseModel.errorResponse(
-        message: 'An unexpected error occurred',
+        message: 'An unexpected error occurred: $e',
       );
     }
   }
@@ -240,9 +256,31 @@ class AuthRepository {
 
   // Private helper methods
   Future<void> _saveAuthData(AuthDataModel authData) async {
-    await _prefs.setString(AppConstants.accessTokenKey, authData.accessToken);
-    await _prefs.setInt(AppConstants.userIdKey, authData.user.id);
-    await _prefs.setString(AppConstants.userProfileKey, jsonEncode(authData.user.toJson()));
+    try {
+      print('AuthRepository: _saveAuthData - Starting to save auth data');
+      print('AuthRepository: _saveAuthData - Access token: ${authData.accessToken?.substring(0, 20)}...');
+      print('AuthRepository: _saveAuthData - User ID: ${authData.user.id}');
+      print('AuthRepository: _saveAuthData - User email: ${authData.user.email}');
+      print('AuthRepository: _saveAuthData - User profileType: ${authData.user.profileType}');
+      
+      await _prefs.setString(AppConstants.accessTokenKey, authData.accessToken!);
+      print('AuthRepository: _saveAuthData - Access token saved');
+      
+      await _prefs.setInt(AppConstants.userIdKey, authData.user.id);
+      print('AuthRepository: _saveAuthData - User ID saved');
+      
+      final userJson = jsonEncode(authData.user.toJson());
+      print('AuthRepository: _saveAuthData - User JSON encoded: ${userJson.substring(0, 100)}...');
+      
+      await _prefs.setString(AppConstants.userProfileKey, userJson);
+      print('AuthRepository: _saveAuthData - User profile saved');
+      
+      print('AuthRepository: _saveAuthData - All auth data saved successfully');
+    } catch (e, stackTrace) {
+      print('AuthRepository: _saveAuthData - Error saving auth data: $e');
+      print('AuthRepository: _saveAuthData - Stack trace: $stackTrace');
+      rethrow;
+    }
   }
 
   Future<void> _clearAuthData() async {

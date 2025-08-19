@@ -61,11 +61,11 @@ class AuthResponseModel extends Equatable {
 
 @JsonSerializable()
 class AuthDataModel extends Equatable {
-  final String accessToken;
+  final String? accessToken; // Make accessToken optional
   final UserModel user;
 
   const AuthDataModel({
-    required this.accessToken,
+    this.accessToken, // Remove required
     required this.user,
   });
 
@@ -83,6 +83,32 @@ class AuthDataModel extends Equatable {
   }) {
     return AuthDataModel(
       accessToken: accessToken ?? this.accessToken,
+      user: user ?? this.user,
+    );
+  }
+}
+
+// Add a separate model for registration responses
+@JsonSerializable()
+class RegistrationDataModel extends Equatable {
+  final UserModel user;
+
+  const RegistrationDataModel({
+    required this.user,
+  });
+
+  factory RegistrationDataModel.fromJson(Map<String, dynamic> json) =>
+      _$RegistrationDataModelFromJson(json);
+
+  Map<String, dynamic> toJson() => _$RegistrationDataModelToJson(this);
+
+  @override
+  List<Object?> get props => [user];
+
+  RegistrationDataModel copyWith({
+    UserModel? user,
+  }) {
+    return RegistrationDataModel(
       user: user ?? this.user,
     );
   }

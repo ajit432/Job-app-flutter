@@ -100,8 +100,9 @@ class AppConstants {
 }
 
 enum UserType {
-  jobSeeker,
+  job_seeker,
   recruiter,
+  companies,
 }
 
 enum PostType {

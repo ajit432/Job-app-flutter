@@ -28,14 +28,35 @@ class UserModel extends Equatable {
     return UserModel(
       id: json['id'] as int,
       email: json['email'] as String,
-      isActive: (json['isActive'] as int) == 1,
+      isActive: json['isActive'] == 1 || json['isActive'] == true,
       profileType: json['profileType'] != null ? 
         UserTypeExtension.fromString(json['profileType'] as String) : null,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: _parseDateTime(json['createdAt'] as String),
+      updatedAt: _parseDateTime(json['updatedAt'] as String),
       profile: json['profile'] != null ? 
         UserProfileModel.fromJson(json['profile'] as Map<String, dynamic>) : null,
     );
+  }
+
+  // Helper method to parse date strings with different formats
+  static DateTime _parseDateTime(String dateString) {
+    try {
+      // Try to parse as ISO format first
+      return DateTime.parse(dateString);
+    } catch (e) {
+      try {
+        // Handle the specific format from backend: "2025-08-20  01:05"
+        // Replace double spaces with single space and add seconds if missing
+        String normalizedDate = dateString.replaceAll('  ', ' ');
+        if (normalizedDate.split(' ').length == 2) {
+          normalizedDate += ':00'; // Add seconds if missing
+        }
+        return DateTime.parse(normalizedDate);
+      } catch (e) {
+        // If all parsing fails, return current time as fallback
+        return DateTime.now();
+      }
+    }
   }
 
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
@@ -77,7 +98,7 @@ class UserModel extends Equatable {
       id: 1,
       email: 'test@example.com',
       isActive: true,
-      profileType: UserType.jobSeeker,
+      profileType: UserType.job_seeker,
       createdAt: DateTime.now().subtract(const Duration(days: 30)),
       updatedAt: DateTime.now(),
       profile: UserProfileModel.mock(),
@@ -319,21 +340,25 @@ class RecruiterProfileModel extends Equatable {
 extension UserTypeExtension on UserType {
   String get value {
     switch (this) {
-      case UserType.jobSeeker:
+      case UserType.job_seeker:
         return 'job_seeker';
       case UserType.recruiter:
         return 'recruiter';
+      case UserType.companies:
+        return 'companies';
     }
   }
 
   static UserType fromString(String value) {
     switch (value) {
       case 'job_seeker':
-        return UserType.jobSeeker;
+        return UserType.job_seeker;
       case 'recruiter':
         return UserType.recruiter;
+      case 'companies':
+        return UserType.companies;
       default:
-        return UserType.jobSeeker;
+        return UserType.job_seeker;
     }
   }
 }

@@ -61,10 +61,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       final result = await _authRepository.register(
         email: event.email,
         password: event.password,
+        profileType: event.profileType,
       );
       
-      if (result.success && result.data != null) {
-        emit(AuthAuthenticated(user: result.data!.user));
+      if (result.success) {
+        // Emit AuthRegistered instead of AuthAuthenticated
+        // This will redirect user to login page instead of home page
+        emit(AuthRegistered());
       } else {
         emit(AuthError(message: result.message));
       }

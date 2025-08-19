@@ -29,8 +29,9 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
     };
 
 const _$UserTypeEnumMap = {
-  UserType.jobSeeker: 'jobSeeker',
+  UserType.job_seeker: 'job_seeker',
   UserType.recruiter: 'recruiter',
+  UserType.companies: 'companies',
 };
 
 UserProfileModel _$UserProfileModelFromJson(Map<String, dynamic> json) =>

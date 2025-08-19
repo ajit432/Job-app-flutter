@@ -227,7 +227,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           ),
           const SizedBox(height: 32),
           _buildProfileTypeCard(
-            type: UserType.jobSeeker,
+            type: UserType.job_seeker,
             title: 'Job Seeker',
             subtitle: 'Looking for opportunities',
             description: 'Find your dream job, showcase your skills, and connect with top companies.',
@@ -443,7 +443,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
           ),
           const SizedBox(height: 8),
           Text(
-            _selectedUserType == UserType.jobSeeker
+            _selectedUserType == UserType.job_seeker
                 ? 'Complete your job seeker profile.'
                 : 'Complete your recruiter profile.',
             style: theme.textTheme.bodyMedium?.copyWith(
@@ -451,7 +451,7 @@ class _ProfileSetupPageState extends State<ProfileSetupPage> {
             ),
           ),
           const SizedBox(height: 32),
-          if (_selectedUserType == UserType.jobSeeker) ...[
+          if (_selectedUserType == UserType.job_seeker) ...[
             FormBuilderTextField(
               name: 'preferredJobLocation',
               decoration: const InputDecoration(

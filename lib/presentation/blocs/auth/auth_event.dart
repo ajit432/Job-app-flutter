@@ -41,16 +41,16 @@ class AuthLoginRequested extends AuthEvent {
 class AuthRegisterRequested extends AuthEvent {
   final String email;
   final String password;
-  final String? fullName;
+  final String profileType;
 
   const AuthRegisterRequested({
     required this.email,
     required this.password,
-    this.fullName,
+    required this.profileType,
   });
 
   @override
-  List<Object?> get props => [email, password, fullName];
+  List<Object?> get props => [email, password, profileType];
 }
 
 class AuthOtpSendRequested extends AuthEvent {
